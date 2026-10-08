@@ -1141,7 +1141,10 @@ async function ghApi(method, url, body){
   const r = await fetch('https://api.github.com'+url, {method:method, headers:headers, body: body?JSON.stringify(body):undefined});
   const txt = await r.text();
   let data=null; try{ data = txt? JSON.parse(txt): null; }catch(e){ data={raw:txt}; }
-  if(!r.ok) throw new Error((data&&data.message)||('HTTP '+r.status));
+  if(!r.ok){
+    const err=new Error((data&&data.message)||('HTTP '+r.status));
+    err.status=r.status; throw err;
+  }
   return data;
 }
 async function ghPull(){
@@ -1166,19 +1169,43 @@ async function ghPush(){
   await ghApi('PUT','/repos/'+c.repo+'/contents/'+c.path,
     {message:'progress: '+new Date().toISOString().slice(0,16), content:b64enc(payload), branch:(c.branch||'master'), sha:sha||undefined});
 }
+let ghRunning=false, ghQueued=false;
+async function ghPushRetry(tries){
+  tries = (tries===undefined? 4 : tries);
+  for(let i=0;i<tries;i++){
+    try{ await ghPush(); return; }
+    catch(e){
+      const m=String((e&&e.message)||'');
+      const conflict = (e && (e.status===409 || e.status===422)) || m.indexOf('does not match')>=0 || m.toLowerCase().indexOf('conflict')>=0;
+      if(conflict && i<tries-1){
+        ghSetStatus('版本冲突，自动重试中…');
+        try{ await ghPull(); }catch(e2){}
+        await new Promise(r=>setTimeout(r, 400 + i*600));
+        continue;
+      }
+      throw e;
+    }
+  }
+}
 async function ghSync(manual){
   const c=ghCfg();
   if(!c.on || !c.token){ if(manual) toast('先勾选「开启自动同步」并填入令牌'); return; }
-  ghSetStatus('同步中…');
+  if(ghRunning){ ghQueued=true; if(manual) toast('同步正在进行，稍后会自动再同步一次'); return; }
+  ghRunning=true;
   try{
-    await ghPull(); await ghPush();
+    ghSetStatus('同步中…');
+    await ghPull();
+    await ghPushRetry();
     c.last=Date.now(); c.err=''; saveDB();
     ghSetStatus('✅ 已同步 ' + new Date(c.last).toLocaleTimeString());
     refreshQuick(); renderHeader();
     if(manual) toast('同步完成 ✅');
   }catch(e){
-    c.err=String(e.message||e); saveDB(); ghSetStatus('❌ '+c.err);
+    c.err=String((e&&e.message)||e); saveDB(); ghSetStatus('❌ '+c.err);
     if(manual) toast('同步失败：'+c.err);
+  }finally{
+    ghRunning=false;
+    if(ghQueued){ ghQueued=false; setTimeout(()=>ghSync(false), 900); }
   }
 }
 let ghTimer=null;
