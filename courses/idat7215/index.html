@@ -1528,11 +1528,11 @@ window.addEventListener('scroll', ()=>{ if(document.body.dataset.view==='notes')
 /* ===================== 学习模式：一步一步学 + 立刻练 ===================== */
 let studyKey='all';
 let todayMode=false, todayN=20;
-function todayList(){                     // 接下来 N 个还没打勾的关卡
-  const rest = STUDY.filter(c=>!studyDone(c.id));
-  return rest.slice(0, todayN);
+function todayList(){                     // 开始时冻结的这一批（打勾的仍留在列表里，位置不乱）
+  const ids = (DB.today && DB.today.ids) || [];
+  return ids.map(id=>STUDY.find(c=>c.id===id)).filter(Boolean);
 }
-function todayDoneCount(){ if(!todayMode) return 0; return todayList().filter(c=>!studyDone(c.id)).length; }
+function todayLeft(){ const L=todayList(); return L.filter(c=>!studyDone(c.id)).length; }
 function studyProg(){ DB.study = DB.study || {}; return DB.study; }
 function studyDone(id){ return !!studyProg()[id]; }
 function soptHtml(q,i,label,sel){
@@ -1590,7 +1590,11 @@ function renderStudy(){
     nav.appendChild(b);
   });
   const cards = todayMode ? todayList() : STUDY.filter(c=>studyKey==='all'||c.key===studyKey);
-  if($('#studyTodayStat')) $('#studyTodayStat').textContent = todayMode ? ('今日剩 ' + cards.length + ' 关（目标 '+todayN+'）') : '';
+  if($('#studyTodayStat')){
+    if(todayMode){ const L=todayList(), left=todayLeft();
+      $('#studyTodayStat').textContent = '今日 ' + (L.length-left) + ' / ' + L.length + ' 关' + (left? '' : ' ✅ 完成'); }
+    else $('#studyTodayStat').textContent = '';
+  }
   list.innerHTML = cards.map(cardHtml).join('');
   list.querySelectorAll('.sfig img').forEach(im=>im.onclick=()=>{ $('#lightboxImg').src=im.src; $('#lightbox').classList.add('on'); });
   list.querySelectorAll('.scard').forEach(bindCard);
@@ -1674,9 +1678,9 @@ function recordStudy(card,q,ok,mine){
     if($('#studyStat')) $('#studyStat').textContent = done+' / '+STUDY.length;
     if($('#studyBar')) $('#studyBar').style.width = (STUDY.length? Math.round(100*done/STUDY.length):0)+'%';
     if(todayMode){
-      const rest = STUDY.filter(c=>!studyDone(c.id)).slice(0, todayN);
-      if($('#studyTodayStat')) $('#studyTodayStat').textContent = rest.length? ('今日剩 '+rest.length+' 关（目标 '+todayN+'）') : '今日目标达成 🎉';
-      if(!rest.length) toast('今日目标达成，可以休息了 🎉');
+      const L=todayList(), left=todayLeft();
+      if($('#studyTodayStat')) $('#studyTodayStat').textContent = '今日 ' + (L.length-left) + ' / ' + L.length + ' 关' + (left? '' : ' ✅ 完成');
+      if(!left) toast('今日目标达成，可以休息了 🎉');
     }
     ghAuto();
     const idx = STUDY.findIndex(c=>c.id===card.id);
@@ -1705,15 +1709,21 @@ $$('#studyTodayRow .tnum').forEach(b=>b.onclick=()=>{ todayN=+b.dataset.n;
   if(todayMode) renderStudy(); });
 $('#studyStartToday').onclick=()=>{
   if(todayMode){ todayMode=false; $('#studyStartToday').textContent='开始今日的学习'; renderStudy(); window.scrollTo({top:0}); return; }
-  todayMode=true; todayKey='all';
+  // 上次还有没做完的 → 直接续做，不重新冻结
+  let ids = (DB.today && DB.today.ids) ? DB.today.ids.filter(id=>!studyDone(id)) : [];
+  if(!ids.length){
+    ids = STUDY.filter(c=>!studyDone(c.id)).slice(0, todayN).map(c=>c.id);
+    if(!ids.length){ toast('所有关卡都做完了 🎉'); return; }
+    DB.today = {ids: ids, stamp: Date.now()}; saveDB();
+  }
+  todayMode=true; studyKey='all';
   $('#studyStartToday').textContent='退出今日模式';
-  const rest = STUDY.filter(c=>!studyDone(c.id));
-  if(!rest.length){ toast('所有关卡都做完了 🎉'); todayMode=false; $('#studyStartToday').textContent='开始今日的学习'; return; }
   renderStudy();
-  const first = document.getElementById('card-'+rest[0].id);
-  if(first && first.scrollIntoView) first.scrollIntoView({behavior:'smooth',block:'start'});
-  toast('今日目标 ' + Math.min(todayN, rest.length) + ' 关，做完就可以休息了');
+  const firstC = todayList().find(c=>!studyDone(c.id));
+  if(firstC){ const el=document.getElementById('card-'+firstC.id); if(el && el.scrollIntoView) el.scrollIntoView({behavior:'smooth',block:'start'}); }
+  toast('今日 ' + todayLeft() + ' 关，做完就休息 🎉');
 };
+$('#studyClearToday') && ($('#studyClearToday').onclick=()=>{ DB.today=null; saveDB(); toast('已重置今日批次'); });
 $('#studyReset').onclick=()=>{ DB.study={}; saveDB(); renderStudy(); toast('学习进度已清空'); };
 
 /* ===================== 真题拆解 ===================== */
