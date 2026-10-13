@@ -1567,6 +1567,7 @@ function renderStudy(){
   });
   const cards = STUDY.filter(c=>studyKey==='all'||c.key===studyKey);
   list.innerHTML = cards.map(cardHtml).join('');
+  list.querySelectorAll('.sfig img').forEach(im=>im.onclick=()=>{ $('#lightboxImg').src=im.src; $('#lightbox').classList.add('on'); });
   list.querySelectorAll('.scard').forEach(bindCard);
 }
 function bindCard(sc){
