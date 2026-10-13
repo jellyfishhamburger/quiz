@@ -110,6 +110,39 @@ table.st th{color:var(--muted);font-weight:600;font-size:12.5px}
 /* notes */
 .notes-nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
 .notes-nav button{font-size:12.5px;padding:5px 10px;border-radius:999px;border:1px solid var(--line);background:var(--card);cursor:pointer}
+.notes-nav button:hover{border-color:var(--accent);color:var(--accent)}
+/* ---- 目录抽屉（只在速记表页显示） ---- */
+.toc-fab{display:none;position:fixed;right:14px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:60;
+  align-items:center;gap:7px;padding:11px 15px;border-radius:999px;border:1px solid var(--accent);
+  background:var(--card);color:var(--accent);font:inherit;font-weight:700;font-size:14px;cursor:pointer;
+  box-shadow:0 6px 22px rgba(0,0,0,.20)}
+.toc-fab span{font-size:16px}
+body[data-view="notes"] .toc-fab{display:inline-flex}
+.toc-mask{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:70}
+.toc-mask.on{display:block}
+.toc-drawer{position:fixed;z-index:71;top:0;right:0;height:100%;width:min(400px,92vw);
+  background:var(--card);border-left:1px solid var(--line);display:flex;flex-direction:column;
+  transform:translateX(102%);transition:transform .22s ease;box-shadow:-8px 0 28px rgba(0,0,0,.18)}
+.toc-drawer.on{transform:none}
+.toc-head{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.toc-head b{font-size:15px}
+.toc-head input{flex:1 1 150px;min-width:0;font:inherit;font-size:16px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--fg)}
+.toc-body{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;padding:6px 0}
+#tocList .toc-item{padding:9px 16px;font-size:14px;line-height:1.45;cursor:pointer;border-left:3px solid transparent;color:var(--fg)}
+#tocList .toc-item:hover{background:var(--bg)}
+#tocList .lv1{font-weight:700;font-size:15px;border-top:1px solid var(--line);margin-top:2px}
+#tocList .lv2{padding-left:30px}
+#tocList .lv3{padding-left:46px;font-size:13px;color:var(--muted)}
+#tocList .toc-item.cur{border-left-color:var(--accent);background:var(--bg);color:var(--accent);font-weight:700}
+#tocList .hide{display:none}
+.toc-foot{display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--line)}
+.toc-foot .btn{flex:1;font-size:13px}
+@media (max-width:760px){
+  .toc-fab{bottom:calc(80px + env(safe-area-inset-bottom))}
+  .toc-drawer{width:100%;height:76%;top:auto;bottom:0;border-left:none;border-top:1px solid var(--line);
+    border-radius:16px 16px 0 0;transform:translateY(102%)}
+  .toc-drawer.on{transform:none}
+}
 .notes{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px 16px 40px;overflow-wrap:break-word}
 .notes h1{font-size:21px;margin:.2em 0 .5em}
 .notes h2{font-size:18px;margin:1.4em 0 .5em;padding-top:10px;border-top:1px solid var(--line)}
@@ -309,6 +342,22 @@ details.sec>summary{cursor:pointer;font-weight:600}
         <button class="btn" id="noteExpand">展开标题</button>
       </div>
       <div class="notes-nav" id="notesNav"></div>
+      <button class="toc-fab" id="tocFab" title="目录"><span>📑</span><em>目录</em></button>
+      <div class="toc-mask" id="tocMask"></div>
+      <aside class="toc-drawer" id="tocDrawer">
+        <div class="toc-head">
+          <b>目录</b>
+          <input type="text" id="tocSearch" placeholder="搜索小节（如：编译器 / K-means / 优先级）">
+          <button class="btn" id="tocClose">✕</button>
+        </div>
+        <div class="toc-body">
+          <div id="tocList"></div>
+        </div>
+        <div class="toc-foot">
+          <button class="btn" id="tocLvl">显示三级小节</button>
+          <button class="btn" id="tocTop">↑ 回到顶部</button>
+        </div>
+      </aside>
     </div>
     <div class="notes" id="notesBody"></div>
   </section>
@@ -479,6 +528,7 @@ function renderHeader(){
   refreshQuick();
 }
 function showView(name){
+  document.body.dataset.view = name;
   $$('#tabs button').forEach(b=>b.classList.toggle('on', b.dataset.v===name));
   $$('.view').forEach(v=>v.classList.toggle('on', v.id==='view-'+name));
   if(name==='stats') renderStats();
@@ -704,7 +754,21 @@ function answerSummaryHtml(q){
   }
   if(q.explain) h += `<div class="model"><b>解析：</b>${esc(q.explain)}</div>`;
   if(q.source) h += `<div class="small muted">出处：${esc(q.source)}</div>`;
+  const anc = notesAnchorFor(q);
+  if(anc) h += `<div style="margin-top:8px"><button class="btn" onclick="gotoNoteAnchor('${anc}')">📖 看这一讲的精讲</button></div>`;
   return h;
+}
+/* 题目 → 它所属讲次的精讲锚点（题库 id 形如 W3-012，或题目自带 notes 字段） */
+function notesAnchorFor(q){
+  if(q && q.notes) return q.notes;
+  const m = String((q&&q.id)||'').match(/^(W\d+)/i);
+  return m ? 'wk-' + m[1].toLowerCase() : null;
+}
+function gotoNoteAnchor(id){
+  showView('notes');
+  const el = document.getElementById(id);
+  if(!el){ toast('找不到这一讲的精讲'); return; }
+  jumpToNote(id);
 }
 function renderFeedback(q){
   const st = S.answered[q.id];
@@ -736,7 +800,9 @@ function renderFeedback(q){
     (q.pairs||[]).forEach((p,i)=>{ body += `<div>${esc(p[0])} → <b>${esc(p[1])}</b></div>`; });
   }
   const zh = $('#showZh').checked && q.explain? `<div class="model" style="border-color:var(--accent)"><b>解析：</b>${esc(q.explain)}</div>`:'';
-  box.innerHTML = `<div class="head">${okHtml}${st.self?'（自评）':''}</div>${body}${zh}${q.source?`<div class="small muted">出处：${esc(q.source)}</div>`:''}`;
+  const anc = notesAnchorFor(q);
+  const ancBtn = anc? `<div style="margin-top:8px"><button class="btn small" onclick="gotoNoteAnchor('${anc}')">📖 看这一讲的精讲</button></div>`:'';
+  box.innerHTML = `<div class="head">${okHtml}${st.self?'（自评）':''}</div>${body}${zh}${q.source?`<div class="small muted">出处：${esc(q.source)}</div>`:''}${ancBtn}`;
   fb.appendChild(box);
   if(st.fromStored){
     const rb=document.createElement('button');
@@ -1291,19 +1357,85 @@ function ghRender(){
 
 /* ===================== notes ===================== */
 let notesReady=false;
+let NOTES_INDEX=[];
+let TOC_LV3=false;
 function ensureNotes(){
   if(notesReady) return; notesReady=true;
   $('#notesBody').innerHTML = NOTES_HTML;
-  // nav
-  const nav=$('#notesNav'); nav.innerHTML='';
-  $$('#notesBody h2, #notesBody h1').forEach((h,i)=>{
-    if(i===0) return;
-    const b=document.createElement('button'); b.textContent=h.textContent.replace(/[#📌]/g,'').trim().slice(0,26);
-    b.onclick=()=>h.scrollIntoView({behavior:'smooth',block:'start'});
-    nav.appendChild(b);
-  });
-  $$('#notesBody img').forEach(img=>img.onclick=()=>{ $('#lightboxImg').src=img.src; $('#lightbox').classList.add('on'); });
+  buildNotesIndex();
+  bindNotesImg();
 }
+/* 建索引：给每个标题一个稳定锚点；顶部只放一级，抽屉里给完整层级 */
+function buildNotesIndex(){
+  NOTES_INDEX=[];
+  $$('#notesBody h1, #notesBody h2, #notesBody h3').forEach((h,i)=>{
+    if(!h.id) h.id='ns-'+i;
+    const t=h.textContent.replace(/[#📌·—–\s]+/g,' ').trim();
+    NOTES_INDEX.push({lvl:+h.tagName.slice(1), text:t, id:h.id});
+  });
+  const nav=$('#notesNav'); if(nav){
+    nav.innerHTML='';
+    NOTES_INDEX.filter(x=>x.lvl===1).forEach(x=>{
+      const b=document.createElement('button'); b.textContent=x.text.slice(0,24);
+      b.onclick=()=>jumpToNote(x.id); nav.appendChild(b);
+    });
+  }
+  const list=$('#tocList'); if(list){
+    list.innerHTML='';
+    NOTES_INDEX.forEach(x=>{
+      const d=document.createElement('div');
+      d.className='toc-item lv'+x.lvl+((x.lvl===3)?' toc3':'');
+      d.dataset.id=x.id; d.dataset.t=x.text.toLowerCase();
+      d.textContent=x.text;
+      d.onclick=()=>{ jumpToNote(x.id); closeToc(); };
+      list.appendChild(d);
+    });
+  }
+  applyTocLvl();
+}
+function applyTocLvl(){
+  $$('#tocList .toc3').forEach(e=>e.classList.toggle('hide', !TOC_LV3));
+  const b=$('#tocLvl'); if(b) b.textContent = TOC_LV3? '只看大节' : '显示三级小节';
+}
+function jumpToNote(id){
+  const el=document.getElementById(id); if(!el) return;
+  if(el.scrollIntoView) el.scrollIntoView({behavior:'smooth', block:'start'});
+  el.style.outline='2px solid var(--accent)';
+  setTimeout(()=>{ el.style.outline=''; }, 2200);
+}
+function openToc(){
+  if(!document.getElementById('ns-0')) buildNotesIndex();
+  $('#tocDrawer').classList.add('on'); $('#tocMask').classList.add('on');
+  $('#tocSearch').value=''; $$('#tocList .toc-item').forEach(it=>it.classList.remove('hide'));
+  applyTocLvl(); syncTocCur();
+}
+function closeToc(){ $('#tocDrawer').classList.remove('on'); $('#tocMask').classList.remove('on'); }
+/* 当前位置高亮（滚动时同步） */
+function syncTocCur(){
+  let cur=null;
+  $$('#notesBody h1, #notesBody h2, #notesBody h3').forEach(h=>{ if(h.getBoundingClientRect().top<=90) cur=h.id; });
+  $$('#tocList .toc-item').forEach(it=>it.classList.toggle('cur', it.dataset.id===cur));
+  const el=$('#tocList .toc-item.cur');
+  if(el && $('#tocDrawer').classList.contains('on')){
+    const box=$('#tocList').parentElement;
+    const r=el.offsetTop, h=el.offsetHeight, c=box.scrollTop, H=box.clientHeight;
+    if(r<c || r+h>c+H) box.scrollTop = Math.max(0, r - H/2);
+  }
+}
+$('#tocFab').onclick=()=>{ ensureNotes(); openToc(); };
+$('#tocClose').onclick=closeToc;
+$('#tocMask').onclick=closeToc;
+$('#tocTop').onclick=()=>window.scrollTo({top:0, behavior:'smooth'});
+$('#tocLvl').onclick=()=>{ TOC_LV3=!TOC_LV3; applyTocLvl(); };
+$('#tocSearch').oninput=e=>{
+  const q=e.target.value.trim().toLowerCase();
+  $$('#tocList .toc-item').forEach(it=>{
+    let show = !q || it.dataset.t.includes(q);
+    if(!q && it.classList.contains('toc3') && !TOC_LV3) show=false;
+    it.classList.toggle('hide', !show);
+  });
+};
+window.addEventListener('scroll', ()=>{ if(document.body.dataset.view==='notes') syncTocCur(); }, {passive:true});
 $('#lightbox').onclick=()=>$('#lightbox').classList.remove('on');
 $('#noteExpand').onclick=()=>{ const d=$$('#notesBody details'); const anyClosed=d.some(x=>!x.open); d.forEach(x=>x.open=anyClosed); };
 $('#noteClear').onclick=()=>{ $('#noteSearch').value=''; doSearch(''); };
