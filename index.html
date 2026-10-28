@@ -29,6 +29,13 @@
  .foot{color:var(--muted);font-size:12.5px;margin-top:30px;text-align:center;line-height:1.9}
  .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--ok);margin-right:6px;vertical-align:1px}
  .arch .dot{background:var(--arch)}
+ .guide{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--accent);
+   border-radius:12px;padding:14px 16px;margin:0 0 20px}
+ .guide b{font-size:15px}
+ .guide ol{margin:8px 0 6px;padding-left:20px;font-size:14px;line-height:1.75}
+ .guide .gsub{font-size:12.5px;color:var(--muted);margin:6px 0 10px}
+ #guideBtn{font:inherit;font-size:13px;padding:6px 14px;border-radius:8px;border:1px solid var(--line);
+   background:transparent;color:var(--accent);font-weight:600;cursor:pointer}
  #impBtn{display:block;width:100%;margin:0 0 12px;padding:14px;border-radius:14px;border:1.5px dashed var(--line);
    background:transparent;color:var(--accent);font:inherit;font-weight:600;cursor:pointer}
  #impBtn:active{border-color:var(--accent)}
@@ -42,10 +49,23 @@
 </style></head><body><div class="wrap">
 <h1>学习中心</h1>
 <p class="sub">每门课一个独立页面：讲义精讲 + 概念速记 + 模拟题（含解析）。手机可直接打开。</p>
+<div class="guide" id="guide">
+ <b>第一次来？三步开始</b>
+ <ol><li>点下面任一门课，进入课程页</li><li>先做「12 题摸底」（约 8 分钟），看清哪几讲可以少花时间</li><li>之后每天点一次「今天学 20 关」：读一小段 → 立刻做一题</li></ol>
+ <p class="gsub">进度自动存在这台设备；同一门课换设备时，在课程页「⋯」里配置同步。</p>
+ <button id="guideBtn">知道了</button>
+</div>
+<script>
+(function(){var g=document.getElementById('guide');if(!g)return;
+ if(localStorage.getItem('lh.guide')==='1'){g.remove();return;}
+ document.getElementById('guideBtn').onclick=function(){localStorage.setItem('lh.guide','1');g.remove();};
+})();
+</script>
 <h2>在读课程</h2><a class="card" href="courses/idat7215/index.html"><div class="top"><span class="dot"></span><span class="code">IDAT7215</span><span class="badge">进行中</span></div><div class="name">IDAT7215 · 期中复习</div><div class="desc">默认「学」页签：119 个知识点关卡，每关一小段讲解 + 立刻做 1–2 题（共 207 题内嵌，即时判分）。另有速记表（5 讲精讲+概念卡）、真题（按考点重组+7 份拆解）、485 题自由刷题。</div><div class="meta"><span>📅 2026-10-22 闭卷 60 分钟</span><span>🕐 范围到 Week 6</span></div></a><a class="card" href="courses/elec6098/index.html"><div class="top"><span class="dot"></span><span class="code">ELEC6098</span><span class="badge">新导入</span></div><div class="name">ELEC6098 · Electronic and Mobile Commerce</div><div class="desc">新导入的演示课程：一份 slides（71 页）→ 3 讲精讲 + 概念卡 + 48 道题，每题带讲义页码，可点开原页。</div><div class="meta"><span>📅 12 月期末（日期待公布）· 选择 + 简答；平时 30% 小组商业计划</span><span>📄 1 份 slides（71 页）</span><span>🧩 3 讲 / 48 题</span></div></a><h2>我的课程（本机）</h2>
 <button id="impBtn">＋ 导入课程包（.pack.json）</button>
 <input type="file" id="impFile" accept=".json,application/json" hidden>
-<p class="hint">课程包由 <code>pack_course.py --pack-json</code> 生成；导入后只存在这台设备的浏览器里，不上传任何地方。<br>
+<p class="hint"><b>怎么给一门新课「做成课」？</b>三条路：① 把 slides / 往年卷发给我，我按同一套流程生成；② 自己按 <code>PROMPT.md</code> 让任意 AI 产出课程包，再用 <code>pack_course.py</code> 校验；③ 直接导入别人做好的 <code>.pack.json</code>。<br>
+    课程包由 <code>pack_course.py --pack-json</code> 生成；导入后只存在这台设备的浏览器里，不上传任何地方。<br>
     想试试？<a href="packs/idat7215.pack.json" download style="color:var(--accent)">下载示例课程包</a>（1.6 MB）→ 点上面的按钮导入。</p>
 <div id="myCourses"></div>
 <script>
