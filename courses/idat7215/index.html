@@ -732,7 +732,7 @@ let COURSE_META = {"id": "idat7215", "code": "IDAT7215", "name": "Computer Progr
 </script>
 <script>
 /* ===================== storage ===================== */
-let LS_KEY = 'quiztrainer.v1';
+let LS_KEY = 'quiztrainer.v1';   // bootCourse 里按课程改成 v2:<id>
 let DB = {banks:{}, results:{}, stars:{}, wrongCount:{}, ui:{}};
 function loadDB(){
   try{ const s = localStorage.getItem(LS_KEY); if(s) DB = Object.assign(DB, JSON.parse(s)); }catch(e){}
@@ -740,6 +740,13 @@ function loadDB(){
     const old = DB.banks[b.id];
     if(!old || old.version !== b.version){ DB.banks[b.id] = b; }
   });
+  // 只留这门课的题库：别的课（如 Lab Safety）不能混进错题本/统计
+  const mine = new Set((EMBEDDED_BANKS||[]).map(b=>b.id));
+  Object.keys(DB.banks).forEach(id=>{
+    const b = DB.banks[id];
+    if(!mine.has(id) && b && b.course === COURSE_META.id) mine.add(id);
+  });
+  Object.keys(DB.banks).forEach(id=>{ if(!mine.has(id)) delete DB.banks[id]; });
 }
 let lsOk = true;
 function saveDB(){
@@ -749,16 +756,21 @@ function saveDB(){
   }
 }
 const qkey = (bid,qid)=> bid+'::'+qid;
-function qResult(bid,qid){ return DB.results[qkey(bid,qid)] || null; }
+function qResult(bid,qid){ return DB.results[qkey(bid,qid)] || DB.results['@'+qid] || null; }
 function markResult(bid,qid,ok,ans){
   const k = qkey(bid,qid);
   const prev = DB.results[k] || {};
   DB.results[k] = {ok:!!ok, ts:Date.now(), tries:(prev.tries||0)+1, ans: ans || prev.ans || null};
+  if(qid) DB.results['@'+qid] = DB.results[k];   // 跨题库共用同一道题的记录
   if(!ok) DB.wrongCount[k] = (DB.wrongCount[k]||0)+1;
   saveDB(); renderHeader(); ghAuto();
 }
-function isStar(bid,qid){ return !!DB.stars[qkey(bid,qid)]; }
-function toggleStar(bid,qid){ const k=qkey(bid,qid); DB.stars[k]=!DB.stars[k]; if(!DB.stars[k]) delete DB.stars[k]; saveDB(); ghAuto(); }
+function isStar(bid,qid){ return !!(DB.stars[qkey(bid,qid)] || DB.stars['@'+qid]); }
+function toggleStar(bid,qid){
+  const k=qkey(bid,qid); DB.stars[k]=!DB.stars[k];
+  if(!DB.stars[k]){ delete DB.stars[k]; delete DB.stars['@'+qid]; } else { DB.stars['@'+qid]=1; }
+  saveDB(); ghAuto();
+}
 
 /* ===================== tiny utils ===================== */
 const $ = s => document.querySelector(s);
@@ -831,6 +843,23 @@ function wrongCounts(){
   const stars = qs.filter(q=>isStar(S.bankId,q.id));
   return {wrong:wrong, stars:stars};
 }
+function aliasResults(){
+  try{
+    const mine = Object.keys(DB.banks);
+    Object.keys(DB.results).forEach(k=>{
+      if(k.indexOf('@')===0) return;
+      const i = k.lastIndexOf('|'); if(i<0) return;
+      const bid = k.slice(0,i), qid = k.slice(i+1);
+      if(mine.indexOf(bid)>=0 && !DB.results['@'+qid]) DB.results['@'+qid] = DB.results[k];
+    });
+    Object.keys(DB.stars).forEach(k=>{
+      if(k.indexOf('@')===0) return;
+      const i = k.lastIndexOf('|'); if(i<0) return;
+      const bid = k.slice(0,i), qid = k.slice(i+1);
+      if(mine.indexOf(bid)>=0 && !DB.stars['@'+qid]) DB.stars['@'+qid] = 1;
+    });
+  }catch(e){}
+}
 function refreshQuick(){
   const w=$('#wrongN'), s=$('#starN'); if(!w||!s) return;
   const c=wrongCounts(); w.textContent=c.wrong.length; s.textContent=c.stars.length;
@@ -848,6 +877,8 @@ function renderBankSelect(){
     const o=document.createElement('option'); o.value=b.id; o.textContent=`${b.name}（${b.questions.length} 题）`; sel.appendChild(o);
   });
   if(!DB.banks[sel.value] && Object.keys(DB.banks).length) sel.value = Object.keys(DB.banks)[0];
+  const allId = (COURSE_META && COURSE_META.id) ? COURSE_META.id + '-all' : '';
+  if(allId && DB.banks[allId] && !S.bankPicked) sel.value = allId;
   S.bankId = sel.value;
 }
 function renderFilters(){
@@ -1335,7 +1366,10 @@ function renderStats(){
     if(r){ done++; byType[t].done++; byTopic[tp].done++; if(r.ok===true){ ok++; byType[t].ok++; byTopic[tp].ok++; } }
   });
   const starN = qs.filter(q=>isStar(bid,q.id)).length;
+  const isAll = (COURSE_META && COURSE_META.id) ? (bid === COURSE_META.id + '-all') : false;
   $('#statSummary').innerHTML = `<h3 style="margin-top:0">总览 · ${esc(bank()?bank().name:'')}</h3>
+    ${isAll ? '' : `<p class="small muted" style="margin:-4px 0 10px">当前只看「${esc(bank()?bank().name:'')}」。
+      <a href="#" id="statGoAll" style="color:var(--accent)">切到「全部讲次」看整门课</a></p>`}
     <div class="row" style="gap:22px">
       <div><div class="small muted">题目总数</div><b style="font-size:22px">${qs.length}</b></div>
       <div><div class="small muted">已做</div><b style="font-size:22px">${done}</b></div>
@@ -1364,6 +1398,7 @@ function renderStats(){
       <button class="btn primary" id="pracStar">▶ 开始练这 ${stars.length} 道收藏题</button>
       <button class="btn" id="clearStar">清空收藏</button>
     </div>`;
+  const ga=$('#statGoAll'); if(ga) ga.onclick=(e)=>{ e.preventDefault(); const a=(COURSE_META.id+'-all'); if(DB.banks[a]){ $('#bankSel').value=a; S.bankId=a; S.bankPicked=true; renderFilters(); refreshQuick(); renderStats(); } };
   const pw=$('#pracWrong'); if(pw) pw.onclick=()=>{ if(!wrongs.length){ toast('还没有错题，先刷几题'); return; } startFromStats('wrong'); };
   const ps=$('#pracStar'); if(ps) ps.onclick=()=>{ if(!stars.length){ toast('还没有收藏题'); return; } startFromStats('star'); };
   const sw=$('#starWrong'); if(sw) sw.onclick=()=>{ wrongs.forEach(q=>{ DB.stars[qkey(bid,q.id)]=1; }); saveDB(); refreshQuick(); renderStats(); toast('已加入收藏（'+wrongs.length+' 题）'); };
@@ -1400,7 +1435,7 @@ function addImported(data, name){
   if(!qs || !Array.isArray(qs)) throw new Error('找不到题目数组（应为数组或 {questions:[...]}）');
   const id = 'imp-'+Math.random().toString(36).slice(2,8);
   const clean = qs.map((q,i)=>({ id: q.id||('Q'+(i+1)), type:q.type||'single', q:q.q, topic:q.topic||'', tag:q.tag||'', options:q.options, answer:q.answer, answers:q.answers, pairs:q.pairs, keywords:q.keywords, model:q.model, explain:q.explain||'', source:q.source||'' }));
-  DB.banks[id] = { id, name: (data.name||name||'导入题库').replace(/\.json$/,''), desc: data.desc||'导入题库', version: Date.now(), questions: clean };
+  DB.banks[id] = { id, name: (data.name||name||'导入题库').replace(/\.json$/,''), desc: data.desc||'导入题库', course:(COURSE_META||{}).id||'', version: Date.now(), questions: clean };
   saveDB(); renderBankSelect(); $('#bankSel').value=id; S.bankId=id; renderFilters(); renderHeader();
   toast('导入成功：'+clean.length+' 题'); renderBanks();
 }
@@ -2183,6 +2218,14 @@ function syncHeaderH(){
   document.documentElement.style.setProperty('--hh', hd.offsetHeight+'px');
 }
 window.addEventListener('resize', syncHeaderH);
+function migrateDB(){
+  // 旧版：所有课共用一个 key（lab 的题会混进 7215）。迁到本课专属 key，保留已有进度。
+  try{
+    if(localStorage.getItem(LS_KEY)) return;
+    const old = localStorage.getItem('quiztrainer.v1');
+    if(old){ localStorage.setItem(LS_KEY, old); }
+  }catch(e){}
+}
 async function bootCourse(){
   let imp=null;
   try{ imp = new URLSearchParams(location.search).get('imp'); }catch(e){}
@@ -2201,7 +2244,7 @@ async function bootCourse(){
       STUDY = P.study || [];
       CALLOUT_HTML = P.callout || '';
       COURSE_META = Object.assign({exam:{}}, P.meta || {});
-      LS_KEY = 'quiztrainer.imp.' + imp;
+      LS_KEY = 'quiztrainer.v2.' + imp;
       if(COURSE_META.name) document.title = COURSE_META.name + ' · 学习中心';
       const bk=document.getElementById('hdrBack') || document.querySelector('.backlink');
       if(bk){ bk.setAttribute('href','index.html'); bk.textContent='← 学习中心'; }
@@ -2211,7 +2254,9 @@ async function bootCourse(){
       return;
     }
   }
-  loadDB(); renderBankSelect(); renderFilters(); renderHeader(); syncHeaderH();
+  if(!window.__IMPORTED) LS_KEY = 'quiztrainer.v2.' + (COURSE_META.id || 'default');
+  migrateDB();
+  loadDB(); aliasResults(); renderBankSelect(); renderFilters(); renderHeader(); syncHeaderH();
   try{ const v0 = new URLSearchParams(location.search).get('v'); if(v0) showView(v0); }catch(e){}
   if($('#studyCallout') && CALLOUT_HTML) $('#studyCallout').innerHTML = CALLOUT_HTML;
   if($('#studyCalloutWrap') && !CALLOUT_HTML) $('#studyCalloutWrap').hidden = true;
