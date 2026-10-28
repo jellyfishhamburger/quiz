@@ -1814,7 +1814,12 @@ function cardHtml(c){
     <div class="steach">${c.html||''}</div>
     <div class="slinks"><button class="btn small" data-act="notes" data-anchor="${c.anchor}">📖 看完整讲解</button>
       <span class="small muted">读完了？做下面的题</span></div>
-    ${(c.qs||[]).map((q,qi)=>qBlockHtml(q,c.id,qi)).join('')}
+    ${(c.qs&&c.qs.length)
+      ? c.qs.map((q,qi)=>qBlockHtml(q,c.id,qi)).join('')
+      : `<div class="row" style="margin-top:10px;align-items:center">
+           <button class="btn primary" data-act="read">✅ 读完了，下一关</button>
+           <span class="small muted">这一节讲义里没有配到题</span>
+         </div>`}
   </div>`;
 }
 function renderStudy(){
@@ -1855,6 +1860,14 @@ function bindCard(sc){
     showView('notes'); const el=document.getElementById(b.dataset.anchor);
     if(el) jumpToNote(b.dataset.anchor); else toast('请到速记表里找这一节');
   });
+  const rd = sc.querySelector('[data-act="read"]');
+  if(rd) rd.onclick = ()=>{
+    studyProg()[cid] = {ts:Date.now(), read:true};
+    saveDB(); renderStudy(); ghAuto();
+    toast('这一关完成');
+    const nx = STUDY.find(c=>!studyDone(c.id));
+    if(nx){ const el=document.getElementById('card-'+nx.id); if(el&&el.scrollIntoView) el.scrollIntoView({behavior:'smooth',block:'start'}); }
+  };
   sc.querySelectorAll('.sq').forEach(sq=>{
     const q = (card.qs||[]).find(x=>x.id===sq.dataset.qid); if(!q) return;
     const opts = sq.querySelectorAll('.sopt'); const picked=[];
@@ -2191,6 +2204,9 @@ document.addEventListener('keydown', e=>{
       const d=Math.ceil((new Date(M.exam+'T00:00:00') - new Date())/86400000);
       if(d>=0){ c.textContent = d===0? '今天考试' : ('距考试 '+d+' 天'); c.classList.toggle('warn', d<=3); }
       else { c.textContent='已考完'; }
+      c.classList.remove('hidden');
+    } else if(c && M.exam_note){
+      c.textContent = String(M.exam_note).split(/[（(，,]/)[0].slice(0, 14);
       c.classList.remove('hidden');
     }
   }
