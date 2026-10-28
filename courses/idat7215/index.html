@@ -1765,9 +1765,8 @@ function gradeStudy(card,q,sq,picked){
   }
 }
 function recordStudy(card,q,ok,mine){
-  const sc0=$('#startCard');
-  if(sc0 && Object.keys(DB.results||{}).length) sc0.classList.add('hidden');
   try{ if(q.type!=='short' || ok===true || ok===false) markResult(q.bid||S.bankId, q.id, ok, {sel:mine}); }catch(e){}
+  const sc0=$('#startCard'); if(sc0) sc0.classList.add('hidden');
   const p = studyProg();
   if(ok===true){
     p[card.id] = 1; saveDB();
