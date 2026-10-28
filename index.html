@@ -29,9 +29,58 @@
  .foot{color:var(--muted);font-size:12.5px;margin-top:30px;text-align:center;line-height:1.9}
  .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--ok);margin-right:6px;vertical-align:1px}
  .arch .dot{background:var(--arch)}
+ #impBtn{display:block;width:100%;margin:0 0 12px;padding:14px;border-radius:14px;border:1.5px dashed var(--line);
+   background:transparent;color:var(--accent);font:inherit;font-weight:600;cursor:pointer}
+ #impBtn:active{border-color:var(--accent)}
+ .icard{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);
+   border-radius:14px;padding:13px 15px;margin-bottom:10px;text-decoration:none;color:inherit;font-size:14.5px}
+ .icard .grow{flex:1;min-width:0}
+ .icard .t{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ .icard .s{font-size:12px;color:var(--muted);margin-top:2px}
+ .idel{border:0;background:transparent;color:var(--muted);font-size:18px;padding:4px 8px;cursor:pointer}
+ .hint{font-size:12.5px;color:var(--muted);margin:-4px 0 14px;line-height:1.6}
 </style></head><body><div class="wrap">
 <h1>学习中心</h1>
 <p class="sub">每门课一个独立页面：讲义精讲 + 概念速记 + 模拟题（含解析）。手机可直接打开。</p>
-<h2>在读课程</h2><a class="card" href="courses/idat7215/index.html"><div class="top"><span class="dot"></span><span class="code">IDAT7215</span><span class="badge">进行中</span></div><div class="name">IDAT7215 · 期中复习</div><div class="desc">默认「学」页签：119 个知识点关卡，每关一小段讲解 + 立刻做 1–2 题（共 207 题内嵌，即时判分）。另有速记表（5 讲精讲+概念卡）、真题（按考点重组+7 份拆解）、485 题自由刷题。</div><div class="meta"><span>📅 2026-10-22 闭卷 60 分钟</span><span>🕐 范围到 Week 6</span><span>📝 488 题（6/6 讲已上线）</span></div></a><h2>已封存</h2><a class="card arch" href="archive/lab-safety/index.html"><div class="top"><span class="dot"></span><span class="code">Lab Safety</span><span class="badge">已封存</span></div><div class="name">HKU ME 实验室安全培训</div><div class="desc">Ir YIP Pak San 的闭卷考试。97 题考点版 + 速记总表（已考完，封存留档）。</div><div class="meta"><span>📅 2026-10-13 已考完</span></div></a>
-<p class="foot">进度会自动同步（手机 ↔ 电脑）· 网址收藏即可随时打开<br>资料留档在私有仓库 study-quiz</p>
+<h2>在读课程</h2><a class="card" href="courses/idat7215/index.html"><div class="top"><span class="dot"></span><span class="code">IDAT7215</span><span class="badge">进行中</span></div><div class="name">IDAT7215 · 期中复习</div><div class="desc">默认「学」页签：119 个知识点关卡，每关一小段讲解 + 立刻做 1–2 题（共 207 题内嵌，即时判分）。另有速记表（5 讲精讲+概念卡）、真题（按考点重组+7 份拆解）、485 题自由刷题。</div><div class="meta"><span>📅 2026-10-22 闭卷 60 分钟</span><span>🕐 范围到 Week 6</span></div></a><h2>已封存</h2><a class="card arch" href="archive/lab-safety/index.html"><div class="top"><span class="dot"></span><span class="code">Lab Safety</span><span class="badge">已封存</span></div><div class="name">HKU ME 实验室安全培训</div><div class="desc">Ir YIP Pak San 的闭卷考试。97 题考点版 + 速记总表（已考完，封存留档）。</div><div class="meta"><span>📅 2026-10-13 已考完</span></div></a>
+<h2>我的课程（本机）</h2>
+<button id="impBtn">＋ 导入课程包（.pack.json）</button>
+<input type="file" id="impFile" accept=".json,application/json" hidden>
+<p class="hint">课程包由 <code>pack_course.py --pack-json</code> 生成；导入后只存在这台设备的浏览器里，不上传任何地方。<br>
+    想试试？<a href="packs/idat7215.pack.json" download style="color:var(--accent)">下载示例课程包</a>（1.6 MB）→ 点上面的按钮导入。</p>
+<div id="myCourses"></div>
+<script>
+(function(){
+ var T={start:"开始学习",empty:"还没有导入的课程。"};
+ function db(cb){ try{ var r=indexedDB.open('lh-packs',1); r.onupgradeneeded=function(){try{r.result.createObjectStore('p')}catch(e){}}; r.onsuccess=function(){cb(r.result)}; r.onerror=function(){cb(null)}; }catch(e){cb(null)} }
+ function list(cb){ db(function(d){ if(!d) return cb([]); var out=[],st=d.transaction('p','readonly').objectStore('p'),cur=st.openCursor();
+   cur.onsuccess=function(e){var c=e.target.result; if(!c){return cb(out)} var v=c.value; try{v=typeof v==='string'?JSON.parse(v):v}catch(err){v={}}
+   out.push({id:c.key,meta:(v&&v.meta)||{},banks:(v&&v.banks||[]).length,study:(v&&v.study||[]).length}); c.continue();}; cur.onerror=function(){cb(out)}; }); }
+ function esc(s){return String(s||'').replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+ function render(){ list(function(items){ var box=document.getElementById('myCourses'); if(!box) return;
+   if(!items.length){ box.innerHTML='<p class="hint">'+T.empty+'</p>'; return; }
+   box.innerHTML=items.map(function(it){ var m=it.meta||{};
+     return '<div class="icard"><a class="grow" href="play.html?imp='+encodeURIComponent(it.id)+'" style="text-decoration:none;color:inherit">'+
+       '<div class="t">'+esc(m.code||it.id)+' · '+esc(m.name||'未命名课程')+'</div>'+
+       '<div class="s">'+(it.banks)+' 个题库 · '+(it.study)+' 关'+(m.exam&&m.exam.date?' · 考试 '+esc(m.exam.date):'')+'</div></a>'+
+       '<button class="idel" data-id="'+esc(it.id)+'" title="删除">✕</button></div>'; }).join('');
+   box.querySelectorAll('.idel').forEach(function(b){ b.onclick=function(){ if(!confirm('删除这门导入的课程？（进度也会删掉）')) return;
+     db(function(d){ if(!d) return; var tx=d.transaction('p','readwrite'); tx.objectStore('p').delete(b.dataset.id); tx.oncomplete=render; }); }; });
+ }); }
+ window.__renderMyCourses=render;
+ var btn=document.getElementById('impBtn'), fi=document.getElementById('impFile');
+ btn && (btn.onclick=function(){ fi.click(); });
+ fi && (fi.onchange=function(){ var f=fi.files&&fi.files[0]; if(!f) return;
+   if(f.size>12*1024*1024){ alert('文件太大（>12MB），这个课程包可能包含太多图片。'); return; }
+   var rd=new FileReader(); rd.onload=function(){ var p; try{ p=JSON.parse(rd.result); }catch(e){ alert('不是有效的课程包（JSON 解析失败）'); return; }
+     if(!p||p.spec!=='coursepack/1'||!p.id||!p.banks){ alert('不是有效的课程包（缺 spec/id/banks）'); return; }
+     db(function(d){ if(!d){ alert('浏览器存储不可用（隐私模式？）'); return; }
+       var tx=d.transaction('p','readwrite'); tx.objectStore('p').put(JSON.stringify(p), p.id);
+       tx.oncomplete=function(){ fi.value=''; render(); alert('已导入：'+(p.meta&&p.meta.name||p.id)+' · 点开就能用，进度存在这台设备。'); };
+       tx.onerror=function(){ alert('写入失败：空间不足？'); }; }); };
+   rd.readAsText(f); });
+ render();
+ })();
+</script>
+<p class="foot">课程页进度会自动同步（手机 ↔ 电脑）· 导入的课程只存本机<br>资料留档在私有仓库 study-quiz</p>
 </div></body></html>
