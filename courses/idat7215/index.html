@@ -305,7 +305,7 @@ details.sec>summary{cursor:pointer;font-weight:600}
 /* ---- 固定索引要从 header 下面开始 ---- */
 :root{--hh:112px}
 .notes-nav.sticky{top:var(--hh);z-index:20;background:var(--bg)}
-.navlab{font-size:11px;letter-spacing:.08em;color:var(--muted);margin:0 2px 0 4px;align-self:center}
+.navlab{font-size:11px;letter-spacing:.06em;color:var(--muted);margin:0 2px 0 6px;align-self:center;white-space:nowrap;flex:0 0 auto}
 .notes-nav .nmeta{font-size:10.5px;color:var(--muted);margin-left:5px}
 /* ---- 真题：分区 / 题卡 ---- */
 .psec{margin:0 0 30px}
@@ -344,6 +344,7 @@ pre.code{background:#0e1014;color:#e7e9ee;padding:11px 13px;border-radius:10px;o
   background:var(--card);color:var(--muted);cursor:pointer}
 .qfilter button.on{border-color:var(--accent);color:var(--accent);font-weight:600}
 @media (max-width:700px){.notes-nav.sticky{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+  .notes-nav.sticky>button{flex:0 0 auto}
   .notes-nav.sticky::-webkit-scrollbar{display:none}}
 
 /* ---- 防溢出兜底 ---- */
