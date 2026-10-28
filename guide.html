@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>怎么用 · 学习中心</title>
+<meta name="theme-color" content="#0f1115">
+<style>
+ :root{--bg:#f6f7f9;--card:#fff;--fg:#14171c;--muted:#6b7280;--line:#e5e7eb;--accent:#3b5bdb;--soft:#eef2ff;--ok:#0f8a4a}
+ @media (prefers-color-scheme:dark){:root{--bg:#0f1115;--card:#181b21;--fg:#e8eaed;--muted:#9aa3af;--line:#2a2f38;--accent:#8aa4ff;--soft:#1c2333;--ok:#4ade80}}
+ *{box-sizing:border-box}
+ body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+   padding:max(18px,env(safe-area-inset-top)) 16px calc(32px + env(safe-area-inset-bottom))}
+ .wrap{max-width:800px;margin:0 auto}
+ a{color:var(--accent)}
+ h1{font-size:26px;margin:10px 0 6px;letter-spacing:.2px}
+ .sub{color:var(--muted);font-size:14px;margin:0 0 24px}
+ h2{font-size:13px;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted);margin:30px 0 10px;font-weight:600}
+ .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 18px;margin-bottom:12px}
+ .card h3{margin:0 0 8px;font-size:16.5px;display:flex;align-items:center;gap:8px}
+ .step{display:flex;gap:10px;margin:10px 0;font-size:14.5px}
+ .n{flex:0 0 22px;height:22px;border-radius:50%;background:var(--soft);color:var(--accent);
+   font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:2px}
+ code{background:rgba(125,135,155,.16);padding:1px 6px;border-radius:5px;font-size:13px;
+   font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+ pre{background:#0e1014;color:#e7e9ee;border-radius:10px;padding:12px 14px;overflow:auto;font-size:12.5px;line-height:1.65;
+   font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+ .tw{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:6px 0}
+ .tw table{min-width:460px;width:100%;border-collapse:collapse;font-size:14px}
+ th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+ th{color:var(--muted);font-weight:600;font-size:12.5px}
+ .badge{font-size:11.5px;padding:2px 9px;border-radius:999px;background:var(--soft);color:var(--accent);font-weight:600}
+ .warn{border-left:3px solid #d97706;background:rgba(217,119,6,.07);border-radius:0 10px 10px 0;padding:10px 13px;font-size:14px;margin:12px 0}
+ .foot{color:var(--muted);font-size:12.5px;text-align:center;margin-top:26px;line-height:1.9}
+</style></head><body><div class="wrap">
+<a href="index.html" style="font-size:14px;text-decoration:none">← 学习中心</a>
+<h1>怎么用</h1>
+<p class="sub">三种身份，三条路径。先看你是不是「只想复习的同学」。</p>
+
+<h2>一、只想复习</h2>
+<div class="card">
+ <h3>1. 打开课程，直接学</h3>
+ <div class="step"><span class="n">1</span><div>在首页点你的课程卡片（不需要注册、不需要登录）。</div></div>
+ <div class="step"><span class="n">2</span><div>先做 <b>12 题摸底</b>（约 8 分钟）：它会告诉你哪几讲可以少花时间。</div></div>
+ <div class="step"><span class="n">3</span><div>之后每天点一次 <b>今天学 20 关</b>：读一小段 → 立刻做一题 → 错题第二天先清。</div></div>
+ <div class="step"><span class="n">4</span><div>考前切到 <b>真题</b>：按考点重组的那篇先读，再逐卷看拆解。</div></div>
+ <p style="font-size:13px;color:var(--muted);margin:8px 0 0">进度存在你这台设备的浏览器里。换设备时在课程页「⋯ → 同步设置」配置（需要你自己的私有仓库）。</p>
+</div>
+
+<h2>二、想给一门新课「做成课」</h2>
+<div class="card">
+ <h3>先说实话：生成必须发生在网页之外</h3>
+ <p style="font-size:14.5px;margin:0 0 10px">这个站是<b>纯静态页面</b>（GitHub Pages），没有服务器、没有模型密钥。所以「拖进 PPT 就自动生成」在浏览器里做不到——生成需要 <b>AI + Python</b>。能在线完成的只有两件事：<b>导入</b>和<b>分享</b>。</p>
+ <div class="tw"><table>
+  <tr><th>路径</th><th>适合谁</th><th>怎么做</th><th>耗时</th></tr>
+  <tr><td><b>A. 交给 Hermes</b><br><span class="badge">最快</span></td><td>你（有 Hermes / 有我这个助手）</td><td>把 slides 和往年卷发我，说「按 slides-to-course 做成课」。我跑技能：提取 → 并行写讲义题库 → 校验 → 构建 → 发布。</td><td>1 份约 10 分钟<br>10 份约 30 分钟</td></tr>
+  <tr><td><b>B. 用任意 AI 生成</b></td><td>没有 Hermes、但有 ChatGPT / Claude</td><td>下载 <a href="tools/PROMPT.md">PROMPT.md</a>，连同课件一起发给 AI；拿它产出的文件，用 <a href="tools/pack_course.py">pack_course.py</a> 校验打包。</td><td>20–40 分钟（看课件量）</td></tr>
+  <tr><td><b>C. 直接用别人做好的</b></td><td>只想省事</td><td>下载 <code>.pack.json</code>，在首页「我的课程（本机）」→ 导入。</td><td>30 秒</td></tr>
+ </table></div>
+</div>
+
+<div class="card">
+ <h3>路径 A 的具体话术（可直接复制）</h3>
+<pre>把这几份 slides 做成学习中心的课程：
+- 文件：/path/to/slides.pdf（共 N 讲）
+- 考试：12 月期末，60 分钟，闭卷，选择 + 简答
+- 有往年卷：/path/to/pastpaper.pdf
+按 slides-to-course 技能跑，做完给我网址。</pre>
+ <p style="font-size:13px;color:var(--muted);margin:8px 0 0">没有往年卷也能做，只是「真题」页会空着——题库密度会明显低于有卷子的课。</p>
+</div>
+
+<div class="card">
+ <h3>路径 B 的文件清单</h3>
+ <div class="tw"><table>
+  <tr><th>文件</th><th>作用</th></tr>
+  <tr><td><a href="tools/PROMPT.md">PROMPT.md</a></td><td>给 AI 的完整指令：输出结构、页码规则、题目格式、自检清单</td></tr>
+  <tr><td><a href="tools/PACK-SPEC.md">PACK-SPEC.md</a></td><td>课程包规范：目录结构、course.json 字段、题库 schema</td></tr>
+  <tr><td><a href="tools/pack_course.py">pack_course.py</a></td><td>校验 + 打包：<code>python pack_course.py 课程目录 --pack-json</code></td></tr>
+  <tr><td><a href="packs/idat7215.pack.json">示例课程包</a></td><td>1.6 MB，含 119 关 / 485 题，可直接导入看效果</td></tr>
+ </table></div>
+</div>
+
+<h2>三、想自己跑整套流程（开发者）</h2>
+<div class="card">
+ <h3>依赖与命令</h3>
+ <p style="font-size:14px;margin:0 0 8px">Python 3.10+，<code>pip install pymupdf</code>。不需要 Node、不需要数据库。</p>
+<pre># 1. 新建课程目录
+cp -r templates/course-template courses/my-course
+
+# 2. 放课件后，让 AI 按 PROMPT.md 产出
+#    weeks/w1/{精讲.md, 概念卡.md, bank_week1.json}
+
+# 3. 校验 → 生成关卡 → 构建
+python pack_course.py courses/my-course --check
+python tools/make_study.py courses/my-course
+python app/build_course.py courses/my-course
+
+# 4. 打成可分享的单文件数据包
+python pack_course.py courses/my-course --pack-json</pre>
+ <p style="font-size:13px;color:var(--muted);margin:8px 0 0">产物：<code>courses/&lt;id&gt;/index.html</code>（单文件课程页）+ <code>&lt;id&gt;.pack.json</code>（可导入、可转发）。</p>
+</div>
+
+<div class="warn">
+ <b>为什么不做成「网页里一键生成」？</b>三条路都要额外成本：① 后端 + API key：需要一台常开的服务器，而且模型生成题目会出错（考试场景不能出错）；② GitHub Action 触发：要把 key 放进仓库 secrets，跑一次几分钟，还得处理并发；③ 纯前端小模型：质量不够，数学/代码题容易编错。<br>
+ 现在的分工是：<b>生成离线、校验自动、内容可复查、站点纯静态</b>——换来的是「电脑关机也能用、不花钱、不会突然挂」。
+</div>
+
+<p class="foot">课程包规范 v1 · 源文件与题库备份在私有仓库 study-quiz<br>遇到问题：在课程页「⋯ → 使用说明」里能看到当前版本与同步状态</p>
+</div></body></html>
