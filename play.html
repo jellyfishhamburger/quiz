@@ -294,14 +294,114 @@ details.sec>summary{cursor:pointer;font-weight:600}
 @media (max-width:420px){
   .mobilebar button{font-size:14.5px;padding:11px 8px}
 }
+
+/* ---- 头部：不溢出 ---- */
+.htop{display:flex;align-items:center;gap:10px;min-width:0;flex-wrap:nowrap}
+.hdr-txt{min-width:0;flex:1 1 auto}
+.logo{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;font-size:16px}
+.hdr-right{display:flex;align-items:center;gap:6px;flex:0 0 auto}
+@media (max-width:760px){#hdrStat{display:none}.backlink{font-size:12.5px;margin-right:2px}}
+@media (max-width:480px){.logo{font-size:14.5px}.hdr-right .chip{display:none}}
+/* ---- 固定索引要从 header 下面开始 ---- */
+:root{--hh:112px}
+.notes-nav.sticky{top:var(--hh);z-index:20;background:var(--bg)}
+.navlab{font-size:11px;letter-spacing:.08em;color:var(--muted);margin:0 2px 0 4px;align-self:center}
+.notes-nav .nmeta{font-size:10.5px;color:var(--muted);margin-left:5px}
+/* ---- 真题：分区 / 题卡 ---- */
+.psec{margin:0 0 30px}
+.psec-h{font-size:19px;margin:0 0 12px;padding-bottom:9px;border-bottom:1px solid var(--line);
+  scroll-margin-top:calc(var(--hh) + 64px);line-height:1.4}
+.part-h{font-size:12px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);
+  margin:20px 0 10px;display:flex;gap:8px;align-items:baseline;font-weight:600}
+.qa{border:1px solid var(--line);border-radius:14px;background:var(--card);padding:14px 15px;margin:0 0 10px}
+.qa-h{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.qno{font-weight:700;font-size:13px;color:var(--accent);font-variant-numeric:tabular-nums}
+.qtag{font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:1px 8px}
+.qa-q{font-size:15px;line-height:1.75}
+.qa-q p{margin:0 0 8px}
+.qa-q p:last-child{margin-bottom:0}
+.qa-q code,.qa-a code{background:rgba(125,135,155,.16);padding:1px 5px;border-radius:5px;font-size:13px;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre.code{background:#0e1014;color:#e7e9ee;padding:11px 13px;border-radius:10px;overflow:auto;
+  font-size:12.5px;line-height:1.65;margin:9px 0;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.qa-a{margin-top:11px;border-top:1px dashed var(--line);padding-top:10px}
+.qa-a summary{cursor:pointer;font-size:12.5px;color:var(--muted);list-style:none;user-select:none}
+.qa-a summary::before{content:'▸  ';font-size:11px}
+.qa-a[open] summary::before{content:'▾  '}
+.qa-ans{margin:9px 0;padding:9px 11px;border-left:3px solid var(--ok);background:rgba(15,138,74,.09);
+  border-radius:0 8px 8px 0;font-size:14.5px;line-height:1.7}
+.qa-row{display:flex;gap:10px;font-size:14px;line-height:1.7;margin:7px 0}
+.qa-row>b{flex:0 0 40px;color:var(--muted);font-weight:600}
+.qa-row>div{min-width:0}
+.qa-src{font-size:11.5px;color:var(--muted);margin-top:8px}
+.pnote{margin:0 0 16px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--card)}
+.pnote summary{cursor:pointer;font-size:13px;color:var(--muted)}
+.pnote p{font-size:13px;line-height:1.7;margin:6px 0}
+.psearch{margin:0 0 4px}
+.psearch summary{cursor:pointer;font-size:13px;color:var(--muted);padding:6px 0}
+.qfilter{display:flex;gap:6px;flex-wrap:wrap;margin:2px 0 0}
+.qfilter button{font-size:12.5px;padding:4px 11px;border-radius:999px;border:1px solid var(--line);
+  background:var(--card);color:var(--muted);cursor:pointer}
+.qfilter button.on{border-color:var(--accent);color:var(--accent);font-weight:600}
+@media (max-width:700px){.notes-nav.sticky{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+  .notes-nav.sticky::-webkit-scrollbar{display:none}}
+
+/* ---- 防溢出兜底 ---- */
+html,body{max-width:100%;overflow-x:hidden}
+header{max-width:100vw;overflow:hidden}
+main,.notes,.psec,.qa{max-width:100%;min-width:0}
+.notes pre,.qa pre,pre.code{max-width:100%;overflow:auto}
+.notes table{display:block;max-width:100%;overflow:auto}
+.notes img,.psec img{max-width:100%;height:auto}
+.notes p,.notes li,.qa p,.qa li{overflow-wrap:anywhere}
+/* ---- 方法类长文分段 ---- */
+.ppart{border:1px solid var(--line);border-radius:12px;margin:0 0 10px;background:var(--card)}
+.ppart>summary{cursor:pointer;padding:12px 14px;font-weight:600;font-size:15px;list-style:none}
+.ppart>summary::before{content:'▸  ';color:var(--muted);font-size:12px}
+.ppart[open]>summary::before{content:'▾  '}
+.ppart[open]>summary{border-bottom:1px solid var(--line)}
+.ppart>*:not(summary){margin-left:14px;margin-right:14px}
+
+/* ---- 宽度硬约束（手机不横向溢出）---- */
+*,*::before,*::after{box-sizing:border-box}
+main{width:100%;max-width:100%;padding-left:14px;padding-right:14px}
+.notes,.psec,.ppart,.qa,.qa-q,.qa-a,.qa-row,.qa-row>div{width:100%;max-width:100%;min-width:0}
+pre,pre.code,.notes pre{width:100%;max-width:100%;overflow:auto;white-space:pre;word-break:normal}
+table{max-width:100%}
+.pintro{font-size:13.5px;line-height:1.75;margin:0 0 14px;padding:10px 12px;border-left:3px solid var(--accent);
+  background:rgba(59,91,219,.06);border-radius:0 10px 10px 0}
+.pintro p{margin:0 0 8px}
+
+/* ---- 「学」页：今天一张卡 ---- */
+.today{padding:16px 16px 14px}
+.today-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.today-num{display:flex;align-items:baseline;gap:7px}
+.today-num b{font-size:22px;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.today-next{display:flex;gap:8px;align-items:baseline;margin-top:12px;font-size:14px;line-height:1.55}
+.today-next #studyNextHint{font-weight:600;min-width:0}
+.today-acts{display:flex;align-items:center;gap:8px;margin-top:12px;flex-wrap:wrap}
+.tcall{padding:0}
+.tcall>summary{cursor:pointer;padding:13px 15px;font-size:14px;font-weight:600;list-style:none}
+.tcall>summary::before{content:'▸  ';color:var(--muted);font-size:12px}
+.tcall[open]>summary::before{content:'▾  '}
+.tcall[open]>summary{border-bottom:1px solid var(--line)}
+.tcall>#studyCallout{padding:0 15px 12px}
+@media (max-width:480px){
+  .today-num b{font-size:20px}
+  .today-row .btn.primary{padding:10px 14px;font-size:14px}
+}
+
+.notes-nav.sticky{padding:9px 0 10px;margin-bottom:6px}
+.today-num span{margin-left:4px;font-size:12px}
+@media (max-width:700px){.psec-h{font-size:17px}}
 </style>
 </head>
 <body>
 <header>
   <div class="htop">
     <a class="backlink" id="hdrBack" href="index.html">← 学习中心</a>
-    <div class="logo" id="hdrCourse">课程</div>
-    <div class="row" style="margin-left:auto">
+    <div class="hdr-txt"><div class="logo" id="hdrCourse">课程</div></div>
+    <div class="hdr-right">
       <span class="small muted hide-sm" id="hdrStat"></span>
       <span class="chip hidden" id="hdrCount"></span>
       <button class="btn ghost small" id="moreBtn" aria-label="更多">⋯</button>
@@ -326,46 +426,36 @@ details.sec>summary{cursor:pointer;font-weight:600}
   </div>
   <!-- ================= STUDY（学） ================= -->
   <section class="view on" id="view-study">
-    <div class="card" id="studyHead">
-      <div class="row" style="justify-content:space-between;align-items:center">
-        <b>一步步学 · 学完立刻练一题</b>
-        <span class="small muted">已完成 <b id="studyStat">0 / 0</b></span>
-      </div>
-      <div class="pbar"><i id="studyBar" style="width:0%"></i></div>
-      <div class="row" style="margin-top:12px;align-items:center">
-        <button class="btn primary big" id="studyStartToday">今天学 20 关</button>
-        <span class="small" id="studyTodayStat"></span>
-        <span class="small muted" id="studyNextHint"></span>
-      </div>
-      <details class="howto"><summary class="small muted">这个页面怎么用？</summary>
-        <ul class="small muted" style="margin:8px 0 0;padding-left:20px">
-          <li>每一关 = 一小段讲解 + 立刻做 1–2 道题；答对才会打勾。</li>
-          <li>「练」页可以按讲次刷题、做真题风格题、或整卷模拟考（60 分钟）。</li>
-          <li>答错自动进「错题 · 收藏」，第二天先清错题最划算。</li>
-          <li>点解析里的「🖼 看讲义这一页」可以对照老师原页。</li>
-        </ul>
-        <div class="row" style="margin-top:10px">
-          <span class="small muted">今日目标</span>
-          <button class="btn tnum" data-n="10">10</button>
-          <button class="btn tnum" data-n="20">20</button>
-          <button class="btn tnum" data-n="30">30</button>
-          <button class="btn" id="studyGo">跳到上次学到的关卡</button>
-          <button class="btn ghost" id="studyReset">清空学习进度</button>
+    <div class="card today" id="studyHead">
+      <div class="today-row">
+        <div>
+          <div class="today-num"><b id="studyStat">0 / 0</b><span class="small muted">关已完成</span></div>
+          <div class="small muted" id="studyTodayStat"></div>
         </div>
-      </details>
-    </div>
-    <div class="card" id="startCard">
-      <b>开始这里（3 步，约 10 分钟）</b>
-      <ol class="small" style="margin:8px 0 0;padding-left:20px">
-        <li>先做 <b>12 题摸底测</b> → 告诉你哪几周可以少花时间</li>
-        <li>再点 <b>今天学 20 关</b> → 学一小段，立刻做一题</li>
-        <li>之后每天先清 <b>错题</b>，再学新关</li>
-      </ol>
-      <div class="row" style="margin-top:10px">
-        <button class="btn primary" id="startDiag">① 摸底测</button>
-        <button class="btn" id="startToday">② 今天学 20 关</button>
+        <button class="btn primary" id="studyStartToday">今天学 20 关</button>
+      </div>
+      <div class="pbar" style="margin-top:12px"><i id="studyBar" style="width:0%"></i></div>
+      <div class="today-next"><span class="small muted">下一关</span><span id="studyNextHint">…</span></div>
+      <div class="today-acts">
+        <button class="btn small" id="studyDiagBtn">12 题摸底</button>
+        <button class="btn small ghost" id="studyGo">继续上次</button>
+        <details class="howto" style="margin-left:auto"><summary class="small muted">设置</summary>
+          <div class="row" style="margin-top:8px">
+            <span class="small muted">今日目标</span>
+            <button class="btn tnum" data-n="10">10</button>
+            <button class="btn tnum" data-n="20">20</button>
+            <button class="btn tnum" data-n="30">30</button>
+            <button class="btn ghost" id="studyReset">清空学习进度</button>
+          </div>
+        </details>
       </div>
     </div>
+
+    <details class="card tcall" id="studyCalloutWrap">
+      <summary>👩‍🏫 老师亲口强调的几条（最值得背）</summary>
+      <div id="studyCallout"></div>
+    </details>
+
     <div class="card" id="doneCard" hidden>
       <b>🎉 全部关卡完成</b>
       <p class="small muted" style="margin:6px 0 0">现在验一次真：60 分钟整卷模拟考，看看错题落在哪。</p>
@@ -374,8 +464,7 @@ details.sec>summary{cursor:pointer;font-weight:600}
         <button class="btn" id="doneWrong">只做错题</button>
       </div>
     </div>
-    <div class="card callout" id="studyCallout"></div>
-    <div class="card" id="diagBox">
+    <div class="card hidden" id="diagBox">
       <div class="row" style="justify-content:space-between;align-items:center">
         <b>⏱ 摸底测（12 题 · 约 8 分钟）</b>
         <span class="small muted" id="diagStat"></span>
@@ -585,11 +674,25 @@ details.sec>summary{cursor:pointer;font-weight:600}
 
   <!-- ================= 真题拆解 ================= -->
   <section class="view" id="view-papers">
-    <div class="row" style="margin-bottom:8px">
-      <input type="text" id="paperSearch" placeholder="在真题拆解里搜索（如：compiler / K-means / 支持度）" style="flex:1 1 240px">
-      <button class="btn" id="paperClear">清空</button>
-    </div>
     <div class="notes-nav sticky" id="paperNav"></div>
+    <details class="psearch">
+      <summary>🔍 搜索真题内容（compiler / K-means / 支持度 …）</summary>
+      <div class="row" style="margin:8px 0">
+        <input type="text" id="paperSearch" placeholder="输入关键词" style="flex:1 1 200px">
+        <button class="btn" id="paperClear">清空</button>
+      </div>
+    </details>
+    <div class="qfilter" id="qFilter">
+      <button class="on" data-f="all">全部</button>
+      <button data-f="选择">单选</button>
+      <button data-f="判断">判断</button>
+      <button data-f="代码">代码输出</button>
+      <button data-f="简答">简答</button>
+    </div>
+    <div class="row" style="margin:10px 0 12px">
+      <button class="btn small" id="pExpand">展开全部答案</button>
+      <span class="small muted">先自己做，再展开对答案</span>
+    </div>
     <div class="notes" id="papersBody"></div>
   </section>
 
@@ -614,6 +717,7 @@ let NOTES_HTML = /*__NOTES__*/"";
 const IMAGES = /*__IMAGES__*/{};
 let HELP_HTML = /*__HELP__*/"";
 let PAPERS_HTML = /*__PAPERS__*/"";
+let PAPERS_NAV = /*__PNAV__*/[];
 let STUDY = /*__STUDY__*/[];
 let CALLOUT_HTML = /*__CALLOUT__*/"";
 let DIAG = /*__DIAG__*/[];
@@ -780,6 +884,12 @@ $('#startBtn').onclick = ()=>start($('#modeSel').value);
 $('#qOrder') && ($('#qOrder').onclick=()=>{ $('#modeSel').value='order'; start('order'); });
 $('#qWrongBig') && ($('#qWrongBig').onclick=()=>$('#quickWrong').click());
 $('#qExamBig') && ($('#qExamBig').onclick=()=>{ $('#modeSel').value='exam'; start('exam'); });
+$('#studyDiagBtn') && ($('#studyDiagBtn').onclick=()=>{
+  const box=$('#diagBox'); if(!box) return;
+  box.classList.remove('hidden');
+  if(!diagOpen){ const b=$('#diagStart'); if(b) b.click(); }
+  if(box.scrollIntoView) box.scrollIntoView({behavior:'smooth',block:'start'});
+});
 $('#startDiag') && ($('#startDiag').onclick=()=>{ const b=$('#diagStart'); if(b){ if(!diagOpen) b.click(); const el=$('#diagBox'); if(el&&el.scrollIntoView) el.scrollIntoView({behavior:'smooth',block:'start'}); } });
 $('#startToday') && ($('#startToday').onclick=()=>$('#studyStartToday').click());
 $('#doneExam') && ($('#doneExam').onclick=()=>{ showView('practice'); $('#modeSel').value='exam'; start('exam'); });
@@ -1685,7 +1795,7 @@ function renderStudy(){
   if(doneC) doneC.classList.toggle('hidden', done < STUDY.length);
   if($('#studyNextHint')){
     const nx = STUDY.find(c=>!studyDone(c.id));
-    $('#studyNextHint').textContent = nx? ('下一关：'+nx.title.slice(0,20)) : '全部完成 🎉';
+    $('#studyNextHint').textContent = nx? nx.title : '全部完成 🎉';
   }
   if($('#studyTodayStat')){
     if(todayMode){ const L=todayList(), left=todayLeft();
@@ -1878,13 +1988,32 @@ function ensurePapers(){
 function renderPapers(){ $('#papersBody').innerHTML = PAPERS_HTML; buildPaperNav(); }
 function buildPaperNav(){
   const nav=$('#paperNav'); if(!nav) return; nav.innerHTML='';
-  const hs = $$('#papersBody h1').length ? $$('#papersBody h1') : $$('#papersBody h2');
-  hs.forEach((h,i)=>{
-    if(!h.id) h.id='pp-'+i;
-    const b=document.createElement('button');
-    b.textContent=h.textContent.replace(/[#📌·—–\s]+/g,' ').trim().slice(0,28);
-    b.onclick=()=>jumpToEl(h); nav.appendChild(b);
+  const groups={};
+  (PAPERS_NAV||[]).forEach(it=>{ (groups[it.group]=groups[it.group]||[]).push(it); });
+  Object.keys(groups).forEach(g=>{
+    const lab=document.createElement('span'); lab.className='navlab'; lab.textContent=g; nav.appendChild(lab);
+    groups[g].forEach((it,i)=>{
+      const b=document.createElement('button');
+      b.innerHTML=esc(it.label)+(it.meta?'<span class="nmeta">'+esc(it.meta)+'</span>':'');
+      b.dataset.target=it.id;
+      b.onclick=()=>{ $$('#paperNav button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); jumpToSec(it.id); };
+      nav.appendChild(b);
+    });
   });
+  // 滚到哪，索引高亮哪
+  if(window.IntersectionObserver && !window.__pnavIO){
+    window.__pnavIO = new IntersectionObserver(es=>{
+      es.forEach(e=>{ if(!e.isIntersecting) return;
+        const id=e.target.id; $$('#paperNav button').forEach(x=>x.classList.toggle('on', x.dataset.target===id)); });
+    }, {rootMargin:'-40% 0px -50% 0px'});
+    $$('#papersBody .psec').forEach(s=>window.__pnavIO.observe(s));
+  }
+}
+function jumpToSec(id){
+  const el=document.getElementById(id); if(!el) return;
+  const hh=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--hh'))||96;
+  const y=el.getBoundingClientRect().top+window.scrollY-hh-56;
+  window.scrollTo({top:Math.max(0,y),behavior:'smooth'});
 }
 function jumpToEl(el){
   if(!el) return;
@@ -1892,6 +2021,26 @@ function jumpToEl(el){
   el.style.outline='2px solid var(--accent)';
   setTimeout(()=>{ el.style.outline=''; }, 2200);
 }
+$('#qFilter') && $$('#qFilter button').forEach(b=>{
+  b.onclick=()=>{
+    $$('#qFilter button').forEach(x=>x.classList.remove('on')); b.classList.add('on');
+    const f=b.dataset.f;
+    $$('#papersBody .qa').forEach(c=>{
+      const t=c.dataset.tag||'';
+      c.style.display = (f==='all' || t.includes(f)) ? '' : 'none';
+    });
+    $$('#papersBody .psec').forEach(s=>{
+      const vis=$$('.qa',s).some(c=>c.style.display!=='none');
+      s.style.display = vis ? '' : 'none';
+    });
+    window.scrollTo({top:0,behavior:'smooth'});
+  };
+});
+$('#pExpand') && ($('#pExpand').onclick=()=>{
+  const all=$$('#papersBody .qa-a'); const anyClosed=all.some(d=>!d.open);
+  all.forEach(d=>d.open=anyClosed);
+  $('#pExpand').textContent = anyClosed ? '收起全部答案' : '展开全部答案';
+});
 $('#paperClear').onclick=()=>{ $('#paperSearch').value=''; renderPapers(); };
 $('#paperSearch').oninput=e=>paperSearch(e.target.value);
 function paperSearch(q){
@@ -2022,6 +2171,11 @@ function loadPackFromIDB(id){
     }catch(e){ res(null); } };
   });
 }
+function syncHeaderH(){
+  const hd=document.querySelector('header'); if(!hd) return;
+  document.documentElement.style.setProperty('--hh', hd.offsetHeight+'px');
+}
+window.addEventListener('resize', syncHeaderH);
 async function bootCourse(){
   let imp=null;
   try{ imp = new URLSearchParams(location.search).get('imp'); }catch(e){}
@@ -2050,8 +2204,10 @@ async function bootCourse(){
       return;
     }
   }
-  loadDB(); renderBankSelect(); renderFilters(); renderHeader();
+  loadDB(); renderBankSelect(); renderFilters(); renderHeader(); syncHeaderH();
+  try{ const v0 = new URLSearchParams(location.search).get('v'); if(v0) showView(v0); }catch(e){}
   if($('#studyCallout') && CALLOUT_HTML) $('#studyCallout').innerHTML = CALLOUT_HTML;
+  if($('#studyCalloutWrap') && !CALLOUT_HTML) $('#studyCalloutWrap').hidden = true;
   renderStudy();
   maybeAutoSync(); ghRender();
   try{ const c=ghCfg(); if(c.on && c.token) ghSync(false); }catch(e){}
