@@ -2025,7 +2025,7 @@ function loadPackFromIDB(id){
 async function bootCourse(){
   let imp=null;
   try{ imp = new URLSearchParams(location.search).get('imp'); }catch(e){}
-  if(!imp && !COURSE_META.id){
+  if(!imp && !COURSE_META.id && !COURSE_META.code && !STUDY.length && !EMBEDDED_BANKS.length){
     document.body.innerHTML = '<div style="max-width:560px;margin:0 auto;padding:48px 22px;font:16px/1.8 -apple-system,BlinkMacSystemFont,\"PingFang SC\",\"Microsoft YaHei\",sans-serif;color:#555">'+
       '<h2 style="font-size:20px;margin:0 0 10px">这是课程运行页</h2>'+
       '<p>它本身没有内容。请先到 <a href="index.html" style="color:#3b5bdb">学习中心</a> 导入课程包（.pack.json），再从「我的课程」点进来。</p></div>';
