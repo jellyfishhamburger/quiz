@@ -1388,16 +1388,16 @@ function renderStats(){
       <div class="small muted">${esc(q.source||'')}${extra||''}</div></div>`;
   $('#wrongList').innerHTML = `<h3 style="margin-top:0">📕 错题本（${wrongs.length}）</h3>
     ${wrongs.length? wrongs.map(q=>itemHtml(q,' · 错 '+(DB.wrongCount[qkey(bid,q.id)]||1)+' 次')).join('') : '<p class="muted">还没有错题 —— 刷几轮就会出现 🎉</p>'}
-    <div class="row" style="margin-top:10px">
+    ${wrongs.length ? `<div class="row" style="margin-top:10px">
       <button class="btn primary" id="pracWrong">▶ 开始练这 ${wrongs.length} 道错题</button>
       <button class="btn" id="starWrong">错题全部加入收藏</button>
-    </div>`;
+    </div>` : ''}`;
   $('#starList').innerHTML = `<h3 style="margin-top:0">⭐ 收藏集（${stars.length}）</h3>
     ${stars.length? stars.map(q=>itemHtml(q)).join('') : '<p class="muted">还没有收藏 —— 做题时点「☆ 收藏」就会出现在这里</p>'}
-    <div class="row" style="margin-top:10px">
+    ${stars.length ? `<div class="row" style="margin-top:10px">
       <button class="btn primary" id="pracStar">▶ 开始练这 ${stars.length} 道收藏题</button>
       <button class="btn" id="clearStar">清空收藏</button>
-    </div>`;
+    </div>` : ''}`;
   const ga=$('#statGoAll'); if(ga) ga.onclick=(e)=>{ e.preventDefault(); const a=(COURSE_META.id+'-all'); if(DB.banks[a]){ $('#bankSel').value=a; S.bankId=a; S.bankPicked=true; renderFilters(); refreshQuick(); renderStats(); } };
   const pw=$('#pracWrong'); if(pw) pw.onclick=()=>{ if(!wrongs.length){ toast('还没有错题，先刷几题'); return; } startFromStats('wrong'); };
   const ps=$('#pracStar'); if(ps) ps.onclick=()=>{ if(!stars.length){ toast('还没有收藏题'); return; } startFromStats('star'); };
