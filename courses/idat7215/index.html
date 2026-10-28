@@ -151,6 +151,13 @@ table.st th{color:var(--muted);font-weight:600;font-size:12.5px}
 .backlink:active{color:var(--accent)}
 .chip{font-size:12px;padding:3px 9px;border-radius:99px;border:1px solid var(--line);color:var(--muted)}
 @media (max-width:560px){.hide-sm{display:none}}
+.quickrow{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.qbtn{display:flex;flex-direction:column;align-items:flex-start;gap:3px;width:100%;padding:12px 12px;border:1px solid var(--line);
+  border-radius:12px;background:var(--card);color:var(--fg);font:inherit;text-align:left;cursor:pointer}
+.qbtn b{font-size:14.5px}
+.qbtn span{font-size:11.5px;color:var(--muted);line-height:1.4}
+.qbtn:active{border-color:var(--accent)}
+@media (max-width:520px){.quickrow{grid-template-columns:1fr}.qbtn{flex-direction:row;align-items:center;gap:8px;padding:11px 12px}}
 .btn.big{font-size:15.5px;padding:12px 18px;border-radius:12px}
 .howto{margin-top:10px}
 .howto summary{cursor:pointer}
@@ -347,6 +354,26 @@ details.sec>summary{cursor:pointer;font-weight:600}
         </div>
       </details>
     </div>
+    <div class="card" id="startCard">
+      <b>开始这里（3 步，约 10 分钟）</b>
+      <ol class="small" style="margin:8px 0 0;padding-left:20px">
+        <li>先做 <b>12 题摸底测</b> → 告诉你哪几周可以少花时间</li>
+        <li>再点 <b>今天学 20 关</b> → 学一小段，立刻做一题</li>
+        <li>之后每天先清 <b>错题</b>，再学新关</li>
+      </ol>
+      <div class="row" style="margin-top:10px">
+        <button class="btn primary" id="startDiag">① 摸底测</button>
+        <button class="btn" id="startToday">② 今天学 20 关</button>
+      </div>
+    </div>
+    <div class="card" id="doneCard" hidden>
+      <b>🎉 全部关卡完成</b>
+      <p class="small muted" style="margin:6px 0 0">现在验一次真：60 分钟整卷模拟考，看看错题落在哪。</p>
+      <div class="row" style="margin-top:10px">
+        <button class="btn primary" id="doneExam">开始模拟考</button>
+        <button class="btn" id="doneWrong">只做错题</button>
+      </div>
+    </div>
     <div class="card callout" id="studyCallout"></div>
     <div class="card" id="diagBox">
       <div class="row" style="justify-content:space-between;align-items:center">
@@ -367,7 +394,12 @@ details.sec>summary{cursor:pointer;font-weight:600}
   <!-- ================= PRACTICE ================= -->
   <section class="view" id="view-practice">
     <div class="card" id="setupCard">
-      <div class="setupgrid">
+      <div class="quickrow">
+        <button class="qbtn" id="qOrder"><b>按讲次练</b><span>顺序 · 跳过已做对</span></button>
+        <button class="qbtn" id="qWrongBig"><b>错题重做</b><span>只练做错的题</span></button>
+        <button class="qbtn" id="qExamBig"><b>模拟考试</b><span>60 分钟 · 整卷</span></button>
+      </div>
+      <div class="row" style="margin-top:12px">
         <div class="field">
           <label class="small muted" for="bankSel">题库</label>
           <select id="bankSel"></select>
@@ -384,22 +416,33 @@ details.sec>summary{cursor:pointer;font-weight:600}
             <option value="exam">模拟考试（60 分钟 · 80% 及格）</option>
           </select>
         </div>
-        <div class="field">
-          <label class="small muted" for="typeSel">题型</label>
-          <select id="typeSel"><option value="">全部</option></select>
-        </div>
-        <div class="field">
-          <label class="small muted" for="topicSel">主题</label>
-          <select id="topicSel"><option value="">全部</option></select>
-        </div>
-        <div class="field">
-          <button class="btn primary" id="startBtn">开始</button>
-          <button class="btn" id="quick10">随机快测 10 题</button>
-          <button class="btn" id="quickWrong">错题重做 <b id="wrongN">0</b></button>
-          <button class="btn" id="quickStar">收藏练习 <b id="starN">0</b></button>
-        </div>
+        <button class="btn primary" id="startBtn">开始</button>
       </div>
-      <div class="row small muted" id="poolInfo" style="margin-top:8px"></div>
+      <details class="adv" style="margin-top:10px">
+        <summary class="small muted">更多设置（题型 / 主题 / 收藏 / 未做 / 最常错 / 选项乱序）</summary>
+        <div class="setupgrid" style="margin-top:10px">
+          <div class="field">
+            <label class="small muted" for="typeSel">题型</label>
+            <select id="typeSel"><option value="">全部</option></select>
+          </div>
+          <div class="field">
+            <label class="small muted" for="topicSel">主题</label>
+            <select id="topicSel"><option value="">全部</option></select>
+          </div>
+          <div class="field">
+            <button class="btn" id="quick10">随机快测 10 题</button>
+            <button class="btn" id="quickWrong">错题重做 <b id="wrongN">0</b></button>
+            <button class="btn" id="quickStar">收藏练习 <b id="starN">0</b></button>
+          </div>
+        </div>
+        <div class="row" style="margin-top:8px">
+          <label class="small"><input type="checkbox" id="shuffleOpts" checked> 选项乱序</label>
+          <label class="small"><input type="checkbox" id="autoNext"> 答对自动跳下一题</label>
+          <label class="small"><input type="checkbox" id="showZh" checked> 显示中文解析</label>
+          <label class="small"><input type="checkbox" id="skipDone" checked> 跳过已做对的题</label>
+        </div>
+      </details>
+            <div class="row small muted" id="poolInfo" style="margin-top:8px"></div>
       <div class="row" style="margin-top:8px">
         <label class="small"><input type="checkbox" id="shuffleOpts" checked> 选项乱序</label>
         <label class="small"><input type="checkbox" id="autoNext"> 答对自动跳下一题</label>
@@ -734,6 +777,13 @@ function buildPool(mode){
   return pool;
 }
 $('#startBtn').onclick = ()=>start($('#modeSel').value);
+$('#qOrder') && ($('#qOrder').onclick=()=>{ $('#modeSel').value='order'; start('order'); });
+$('#qWrongBig') && ($('#qWrongBig').onclick=()=>$('#quickWrong').click());
+$('#qExamBig') && ($('#qExamBig').onclick=()=>{ $('#modeSel').value='exam'; start('exam'); });
+$('#startDiag') && ($('#startDiag').onclick=()=>{ const b=$('#diagStart'); if(b){ if(!diagOpen) b.click(); const el=$('#diagBox'); if(el&&el.scrollIntoView) el.scrollIntoView({behavior:'smooth',block:'start'}); } });
+$('#startToday') && ($('#startToday').onclick=()=>$('#studyStartToday').click());
+$('#doneExam') && ($('#doneExam').onclick=()=>{ showView('practice'); $('#modeSel').value='exam'; start('exam'); });
+$('#doneWrong') && ($('#doneWrong').onclick=()=>{ showView('practice'); $('#quickWrong').click(); });
 $('#quick10').onclick = ()=>{ $('#modeSel').value='random'; start('random',10); };
 
 function start(mode,n){
@@ -1630,6 +1680,9 @@ function renderStudy(){
     nav.appendChild(b);
   });
   const cards = todayMode ? todayList() : STUDY.filter(c=>studyKey==='all'||c.key===studyKey);
+  const startC=$('#startCard'), doneC=$('#doneCard');
+  if(startC) startC.classList.toggle('hidden', !(done===0 && Object.keys(DB.results||{}).length===0));
+  if(doneC) doneC.classList.toggle('hidden', done < STUDY.length);
   if($('#studyNextHint')){
     const nx = STUDY.find(c=>!studyDone(c.id));
     $('#studyNextHint').textContent = nx? ('下一关：'+nx.title.slice(0,20)) : '全部完成 🎉';
@@ -1712,6 +1765,8 @@ function gradeStudy(card,q,sq,picked){
   }
 }
 function recordStudy(card,q,ok,mine){
+  const sc0=$('#startCard');
+  if(sc0 && Object.keys(DB.results||{}).length) sc0.classList.add('hidden');
   try{ if(q.type!=='short' || ok===true || ok===false) markResult(q.bid||S.bankId, q.id, ok, {sel:mine}); }catch(e){}
   const p = studyProg();
   if(ok===true){
