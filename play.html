@@ -348,8 +348,8 @@ pre.code{background:#0e1014;color:#e7e9ee;padding:11px 13px;border-radius:10px;o
   .notes-nav.sticky::-webkit-scrollbar{display:none}}
 
 /* ---- 防溢出兜底 ---- */
-html,body{max-width:100%;overflow-x:hidden}
-header{max-width:100vw;overflow:hidden}
+html,body{max-width:100%}
+header{max-width:100vw}
 main,.notes,.psec,.qa{max-width:100%;min-width:0}
 .notes pre,.qa pre,pre.code{max-width:100%;overflow:auto}
 .notes table{display:block;max-width:100%;overflow:auto}
@@ -395,6 +395,12 @@ table{max-width:100%}
 .notes-nav.sticky{padding:9px 0 10px;margin-bottom:6px}
 .today-num span{margin-left:4px;font-size:12px}
 @media (max-width:700px){.psec-h{font-size:17px}}
+
+/* 兜底裁剪：clip 不创建滚动容器，不会让 sticky 失效（hidden 会） */
+@supports (overflow:clip){ html,body{overflow-x:clip} }
+/* 顶部两层导航：header 固定 + 页内索引贴着它 */
+header{position:sticky;top:0;z-index:40}
+.notes-nav.sticky{z-index:30;top:var(--hh)}
 </style>
 </head>
 <body>
